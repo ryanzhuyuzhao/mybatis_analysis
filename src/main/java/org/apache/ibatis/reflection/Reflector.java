@@ -49,16 +49,23 @@ import org.apache.ibatis.util.MapUtil;
  * @author Clinton Begin
  */
 public class Reflector {
-
+  //对应的Class类型
   private final Class<?> type;
+  //可读属性的名称集合，可读属性就是存在相应getter方法的属性
   private final String[] readablePropertyNames;
+  //可写属性的名称集合，可写属性就是存在相应setter方法的属性
   private final String[] writablePropertyNames;
+  //记录了属性相应的setter方法，key是属性名称，value是Invoker对象，它是对setter方法对应Method对象的封装
   private final Map<String, Invoker> setMethods = new HashMap<>();
+  //属性相应的getter方法，key是属性名称，value是Invoker对象，它是对getter方法对应Method对象的封装
   private final Map<String, Invoker> getMethods = new HashMap<>();
+  //记录了属性相应的setter方法的参数值类型，key是属性名称，value是setter方法的参数类型
   private final Map<String, Class<?>> setTypes = new HashMap<>();
+  //记录了属性相应的getter方法的参数值类型，key是属性名称，value是getter方法的参数类型
   private final Map<String, Class<?>> getTypes = new HashMap<>();
+  //记录了默认构造方法
   private Constructor<?> defaultConstructor;
-
+  //记录了所有属性名称的集合
   private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
   public Reflector(Class<?> clazz) {
@@ -66,7 +73,7 @@ public class Reflector {
     addDefaultConstructor(clazz);
     addGetMethods(clazz);
     addSetMethods(clazz);
-    addFields(clazz);
+    addFields(clazz);//处理没有getter/setter方法的字段
     readablePropertyNames = getMethods.keySet().toArray(new String[0]);
     writablePropertyNames = setMethods.keySet().toArray(new String[0]);
     for (String propName : readablePropertyNames) {
@@ -274,13 +281,16 @@ public class Reflector {
    * @return An array containing all methods in this class
    */
   private Method[] getClassMethods(Class<?> clazz) {
+    //用于记录指定类中定义的全部方法的唯一签名以及对应的Method对象
     Map<String, Method> uniqueMethods = new HashMap<>();
     Class<?> currentClass = clazz;
     while (currentClass != null && currentClass != Object.class) {
+      //记录currentClass这个类中定义的全部方法
       addUniqueMethods(uniqueMethods, currentClass.getDeclaredMethods());
 
       // we also need to look for interface methods -
       // because the class may be abstract
+      //记录接口中定义的方法
       Class<?>[] interfaces = currentClass.getInterfaces();
       for (Class<?> anInterface : interfaces) {
         addUniqueMethods(uniqueMethods, anInterface.getMethods());
@@ -296,8 +306,8 @@ public class Reflector {
 
   private void addUniqueMethods(Map<String, Method> uniqueMethods, Method[] methods) {
     for (Method currentMethod : methods) {
-      if (!currentMethod.isBridge()) {
-        String signature = getSignature(currentMethod);
+      if (!currentMethod.isBridge()) {//如果方法不是桥接方法 什么是桥接方法，https://blog.csdn.net/mhmyqn/article/details/47342577
+        String signature = getSignature(currentMethod);//获取方法的签名，方法的返回类型和参数类型
         // check to see if the method is already known
         // if it is known, then an extended class must have
         // overridden a method
