@@ -36,18 +36,26 @@ import org.apache.ibatis.io.Resources;
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
-public class UnpooledDataSource implements DataSource {
-
+public class UnpooledDataSource implements DataSource {//没有使用数据库连接池
+  //加载Driver类的类加载器
   private ClassLoader driverClassLoader;
+  //数据库连接驱动的相关配置
   private Properties driverProperties;
+  //缓存所有已注册的数据库连接驱动
   private static Map<String, Driver> registeredDrivers = new ConcurrentHashMap<>();
 
+  //数据库连接的驱动名称
   private String driver;
+  //数据库URL
   private String url;
+  //用户名
   private String username;
+  //密码
   private String password;
 
+  //是否自动提交
   private Boolean autoCommit;
+  //事务隔离级别
   private Integer defaultTransactionIsolationLevel;
   private Integer defaultNetworkTimeout;
 
@@ -220,8 +228,11 @@ public class UnpooledDataSource implements DataSource {
   }
 
   private Connection doGetConnection(Properties properties) throws SQLException {
+    //初始化数据库驱动
     initializeDriver();
+    //创建真正的数据库连接
     Connection connection = DriverManager.getConnection(url, properties);
+    //配置数据库连接的autoCommit和隔离级别
     configureConnection(connection);
     return connection;
   }
