@@ -39,21 +39,28 @@ import org.apache.ibatis.logging.LogFactory;
 public class PooledDataSource implements DataSource {
 
   private static final Log log = LogFactory.getLog(PooledDataSource.class);
-
+  //通过PoolState管理连接池的状态并记录统计信息
   private final PoolState state = new PoolState(this);
-
+  //记录UnpooledDataSource对象，用于生成真实的数据库连接对象，构造函数中会初始化该字段
   private final UnpooledDataSource dataSource;
 
   // OPTIONAL CONFIGURATION FIELDS
+  //最大活跃连接数
   protected int poolMaximumActiveConnections = 10;
+  //最大空闲连接数
   protected int poolMaximumIdleConnections = 5;
+  //最大checkout时长
   protected int poolMaximumCheckoutTime = 20000;
+  //在无法获取连接时，线程需要等待的时间
   protected int poolTimeToWait = 20000;
   protected int poolMaximumLocalBadConnectionTolerance = 3;
+  //在检测一个数据库连接是否可用时，会给数据库发送一个测试SQL语句
   protected String poolPingQuery = "NO PING QUERY SET";
+  //是否允许发送测试SQL语句
   protected boolean poolPingEnabled;
+  //当连接超过poolPingConnectionsNotUsedFor毫秒未使用时，会发送一次测试SQL语句，检测连接是否正常
   protected int poolPingConnectionsNotUsedFor;
-
+  //根据数据库的URL、用户名和密码生成的一个hash值，该哈希值用于标志着当前的连接池，在构造函数中初始化
   private int expectedConnectionTypeCode;
 
   public PooledDataSource() {
@@ -327,7 +334,7 @@ public class PooledDataSource implements DataSource {
   /**
    * Closes all active and idle connections in the pool.
    */
-  public void forceCloseAll() {
+  public void forceCloseAll() {//关闭PooledConnection集合中所有的空闲和活跃的数据库连接
     synchronized (state) {
       expectedConnectionTypeCode = assembleConnectionTypeCode(dataSource.getUrl(), dataSource.getUsername(), dataSource.getPassword());
       for (int i = state.activeConnections.size(); i > 0; i--) {
@@ -379,24 +386,24 @@ public class PooledDataSource implements DataSource {
       if (conn.isValid()) {
         if (state.idleConnections.size() < poolMaximumIdleConnections && conn.getConnectionTypeCode() == expectedConnectionTypeCode) {
           state.accumulatedCheckoutTime += conn.getCheckoutTime();
-          if (!conn.getRealConnection().getAutoCommit()) {
+          if (!conn.getRealConnection().getAutoCommit()) {//回滚未提交的事务
             conn.getRealConnection().rollback();
           }
           PooledConnection newConn = new PooledConnection(conn.getRealConnection(), this);
           state.idleConnections.add(newConn);
           newConn.setCreatedTimestamp(conn.getCreatedTimestamp());
           newConn.setLastUsedTimestamp(conn.getLastUsedTimestamp());
-          conn.invalidate();
+          conn.invalidate();//将原PooledConnection对象设置为无效
           if (log.isDebugEnabled()) {
             log.debug("Returned connection " + newConn.getRealHashCode() + " to pool.");
           }
-          state.notifyAll();
+          state.notifyAll();//唤醒阻塞等待的线程
         } else {
           state.accumulatedCheckoutTime += conn.getCheckoutTime();
           if (!conn.getRealConnection().getAutoCommit()) {
             conn.getRealConnection().rollback();
           }
-          conn.getRealConnection().close();
+          conn.getRealConnection().close();//关闭真正的数据库连接
           if (log.isDebugEnabled()) {
             log.debug("Closed connection " + conn.getRealHashCode() + ".");
           }
