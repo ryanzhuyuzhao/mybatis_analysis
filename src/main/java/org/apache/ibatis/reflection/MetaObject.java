@@ -31,11 +31,15 @@ import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
  * @author Clinton Begin
  */
 public class MetaObject {
-
+  //原始JavaBean对象
   private final Object originalObject;
+  //ObjectWrapper对象，其中封装了originalObject对象
   private final ObjectWrapper objectWrapper;
+  //负责实例化originalObject的工厂对象
   private final ObjectFactory objectFactory;
+  //负责创建ObjectWrapper的工厂对象
   private final ObjectWrapperFactory objectWrapperFactory;
+  //用于创建并缓存Reflector对象的工厂对象
   private final ReflectorFactory reflectorFactory;
 
   private MetaObject(Object object, ObjectFactory objectFactory, ObjectWrapperFactory objectWrapperFactory, ReflectorFactory reflectorFactory) {

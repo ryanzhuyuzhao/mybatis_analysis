@@ -243,12 +243,14 @@ public class ResolverUtil<T> {
    * @return the resolver util
    */
   public ResolverUtil<T> find(Test test, String packageName) {
+    //根据包名获取其对应的路径
     String path = getPackagePath(packageName);
 
     try {
+      //通过VFS.list()查找packageName包下的所有资源
       List<String> children = VFS.getInstance().list(path);
       for (String child : children) {
-        if (child.endsWith(".class")) {
+        if (child.endsWith(".class")) {//检测该类是否符合test条件
           addIfMatching(test, child);
         }
       }

@@ -28,7 +28,7 @@ public final class PropertyCopier {
     // Prevent Instantiation of Static Class
   }
 
-  public static void copyBeanProperties(Class<?> type, Object sourceBean, Object destinationBean) {
+  public static void copyBeanProperties(Class<?> type, Object sourceBean, Object destinationBean) {//深度拷贝
     Class<?> parent = type;
     while (parent != null) {
       final Field[] fields = parent.getDeclaredFields();

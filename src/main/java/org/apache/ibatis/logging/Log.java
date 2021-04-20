@@ -18,7 +18,7 @@ package org.apache.ibatis.logging;
 /**
  * @author Clinton Begin
  */
-public interface Log {
+public interface Log {//日志适配器实现类需要实现的接口
 
   boolean isDebugEnabled();
 

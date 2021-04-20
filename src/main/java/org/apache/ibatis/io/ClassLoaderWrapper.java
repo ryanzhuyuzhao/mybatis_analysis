@@ -199,11 +199,11 @@ public class ClassLoaderWrapper {
 
   ClassLoader[] getClassLoaders(ClassLoader classLoader) {
     return new ClassLoader[]{
-        classLoader,
-        defaultClassLoader,
-        Thread.currentThread().getContextClassLoader(),
-        getClass().getClassLoader(),
-        systemClassLoader};
+        classLoader,//参数指定的类加载器
+        defaultClassLoader,//系统指定的默认类加载器
+        Thread.currentThread().getContextClassLoader(),//当前线程绑定的类加载器
+        getClass().getClassLoader(),//加载当前类所使用的类加载器
+        systemClassLoader};//System ClassLoader
   }
 
 }
