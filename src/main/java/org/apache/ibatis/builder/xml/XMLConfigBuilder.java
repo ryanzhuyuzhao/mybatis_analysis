@@ -53,9 +53,13 @@ import org.apache.ibatis.type.JdbcType;
  */
 public class XMLConfigBuilder extends BaseBuilder {
 
+  //标识是否已经解析过mybatis-config.xml配置文件
   private boolean parsed;
+  //用于解析mybatis-config.xml配置文件的XPathParser对象
   private final XPathParser parser;
+  //标识<environment>配置的名称，默认读取<environment>标签的default属性
   private String environment;
+  //ReflectorFactory负责创建和缓存Reflector对象
   private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory();
 
   public XMLConfigBuilder(Reader reader) {

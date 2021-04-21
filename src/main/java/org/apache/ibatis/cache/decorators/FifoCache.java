@@ -27,8 +27,11 @@ import org.apache.ibatis.cache.Cache;
  */
 public class FifoCache implements Cache {
 
+  //底层被装饰的底层Cache对象
   private final Cache delegate;
+  //用于记录key进入缓存的先后顺序，使用的是LinkedList<Object>类型的集合对象
   private final Deque<Object> keyList;
+  //记录了缓存项的上限，超过该值，则需要清理最老的缓存项
   private int size;
 
   public FifoCache(Cache delegate) {

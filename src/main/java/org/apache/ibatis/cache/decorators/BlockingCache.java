@@ -94,9 +94,9 @@ public class BlockingCache implements Cache {
         break;
       }
       try {
-        if (timeout > 0) {
+        if (timeout > 0) {//获取锁，带超时时长
           boolean acquired = latch.await(timeout, TimeUnit.MILLISECONDS);
-          if (!acquired) {
+          if (!acquired) {//超时则抛出异常
             throw new CacheException(
                 "Couldn't get a lock in " + timeout + " for the key " + key + " at the cache " + delegate.getId());
           }

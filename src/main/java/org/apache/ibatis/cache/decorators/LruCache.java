@@ -26,9 +26,11 @@ import org.apache.ibatis.cache.Cache;
  * @author Clinton Begin
  */
 public class LruCache implements Cache {
-
+  //被装饰的底层Cache对象
   private final Cache delegate;
+  //LinkedHashMap<Object, Object>类型对象，它是一个有序的HashMap，用于记录key最近的使用情况
   private Map<Object, Object> keyMap;
+  //记录最少被使用的缓存项的key
   private Object eldestKey;
 
   public LruCache(Cache delegate) {
