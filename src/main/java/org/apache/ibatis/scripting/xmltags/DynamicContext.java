@@ -37,8 +37,9 @@ public class DynamicContext {
   static {
     OgnlRuntime.setPropertyAccessor(ContextMap.class, new ContextAccessor());
   }
-
+  //参数上下文
   private final ContextMap bindings;
+  //在SqlNode解析动态SQL时，会将解析后的SQL语句片段添加到改属性中保存，最终拼凑出一条完成的SQL语句
   private final StringJoiner sqlBuilder = new StringJoiner(" ");
   private int uniqueNumber = 0;
 
@@ -46,7 +47,7 @@ public class DynamicContext {
     if (parameterObject != null && !(parameterObject instanceof Map)) {
       MetaObject metaObject = configuration.newMetaObject(parameterObject);
       boolean existsTypeHandler = configuration.getTypeHandlerRegistry().hasTypeHandler(parameterObject.getClass());
-      bindings = new ContextMap(metaObject, existsTypeHandler);
+      bindings = new ContextMap(metaObject, existsTypeHandler);//初始化bindings集合
     } else {
       bindings = new ContextMap(null, false);
     }
@@ -76,6 +77,7 @@ public class DynamicContext {
 
   static class ContextMap extends HashMap<String, Object> {
     private static final long serialVersionUID = 2977601501966151582L;
+    //将用户传入的参数封装成了MetaObject对象
     private final MetaObject parameterMetaObject;
     private final boolean fallbackParameterObject;
 

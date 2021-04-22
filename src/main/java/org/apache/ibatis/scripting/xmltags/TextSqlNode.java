@@ -47,11 +47,15 @@ public class TextSqlNode implements SqlNode {
 
   @Override
   public boolean apply(DynamicContext context) {
+    //创建GenericTokenParser解析器
+    //BindingTokenParser的功能
     GenericTokenParser parser = createParser(new BindingTokenParser(context, injectionFilter));
+    //将解析后的SQL片段添加到DynamicContext中
     context.appendSql(parser.parse(text));
     return true;
   }
 
+  //解析的是“${}”占位符
   private GenericTokenParser createParser(TokenHandler handler) {
     return new GenericTokenParser("${", "}", handler);
   }
@@ -68,15 +72,17 @@ public class TextSqlNode implements SqlNode {
 
     @Override
     public String handleToken(String content) {
+      //获取用户提供的实参
       Object parameter = context.getBindings().get("_parameter");
       if (parameter == null) {
         context.getBindings().put("value", null);
       } else if (SimpleTypeRegistry.isSimpleType(parameter.getClass())) {
         context.getBindings().put("value", parameter);
       }
+      //通过OGNL解析content的值
       Object value = OgnlCache.getValue(content, context.getBindings());
       String srtValue = value == null ? "" : String.valueOf(value); // issue #274 return "" instead of "null"
-      checkInjection(srtValue);
+      checkInjection(srtValue);//检测合法性
       return srtValue;
     }
 

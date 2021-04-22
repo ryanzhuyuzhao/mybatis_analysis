@@ -26,14 +26,22 @@ import org.apache.ibatis.session.Configuration;
 public class ForEachSqlNode implements SqlNode {
   public static final String ITEM_PREFIX = "__frch_";
 
+  //用于判断循环的终止条件，ForEachSqlNode构造方法中会创建该对象
   private final ExpressionEvaluator evaluator;
+  //迭代的集合表达式
   private final String collectionExpression;
+  //记录了该ForEachSqlNode节点的子节点
   private final SqlNode contents;
+  //在循环开始前要添加的字符串
   private final String open;
+  //在循环结束后要添加的字符串
   private final String close;
+  //循环过程中，每项之间的分隔符
   private final String separator;
+  //index是当前迭代的次数，item的值是本次迭代的元素。若迭代集合石Map，则index是键，item是值
   private final String item;
   private final String index;
+  //配置对象
   private final Configuration configuration;
 
   public ForEachSqlNode(Configuration configuration, SqlNode contents, String collectionExpression, String index, String item, String open, String close, String separator) {
@@ -121,8 +129,11 @@ public class ForEachSqlNode implements SqlNode {
 
   private static class FilteredDynamicContext extends DynamicContext {
     private final DynamicContext delegate;
+    //对应集合项在集合中的索引位置
     private final int index;
+    //对应集合项的index
     private final String itemIndex;
+    //对应集合项的item
     private final String item;
 
     public FilteredDynamicContext(Configuration configuration,DynamicContext delegate, String itemIndex, String item, int i) {
@@ -171,7 +182,9 @@ public class ForEachSqlNode implements SqlNode {
 
   private class PrefixedContext extends DynamicContext {
     private final DynamicContext delegate;
+    //指定的前缀
     private final String prefix;
+    //是否已经处理过前缀
     private boolean prefixApplied;
 
     public PrefixedContext(DynamicContext delegate, String prefix) {
@@ -197,11 +210,11 @@ public class ForEachSqlNode implements SqlNode {
 
     @Override
     public void appendSql(String sql) {
-      if (!prefixApplied && sql != null && sql.trim().length() > 0) {
-        delegate.appendSql(prefix);
-        prefixApplied = true;
+      if (!prefixApplied && sql != null && sql.trim().length() > 0) {//潘墩是否需要追加前缀
+        delegate.appendSql(prefix);//追加前缀
+        prefixApplied = true;//表示已经处理过前缀
       }
-      delegate.appendSql(sql);
+      delegate.appendSql(sql);//追加sql片段
     }
 
     @Override

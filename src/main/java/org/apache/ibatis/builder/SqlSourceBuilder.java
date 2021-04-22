@@ -40,8 +40,13 @@ public class SqlSourceBuilder extends BaseBuilder {
     super(configuration);
   }
 
+  //originalSql参数是经过SqlNode.apply()方法处理之后的SQL语句
+  //parameterType参数是用户传入的实参类型
+  //additionalParameters参数记录了形参与实参的对应关系，其实就是经过SqlNode.apply()方法处理后的DynamicContext.bindings集合
   public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) {
+    //创建ParameterMappingTokenHandler对象，它是解析“#{}”占位符中的参数属性以及替换占位符的核心
     ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType, additionalParameters);
+    //适应GenericTokenParser与ParameterMappingTokenHandler配合解析“#{}”占位符
     GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
     String sql;
     if (configuration.isShrinkWhitespacesInSql()) {
@@ -49,6 +54,7 @@ public class SqlSourceBuilder extends BaseBuilder {
     } else {
       sql = parser.parse(originalSql);
     }
+    //创建StaticSqlSource，其中封装了占位符被替换成“？”的SQL语句以及参数对应的ParameterMapping集合
     return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
   }
 
@@ -68,8 +74,11 @@ public class SqlSourceBuilder extends BaseBuilder {
 
   private static class ParameterMappingTokenHandler extends BaseBuilder implements TokenHandler {
 
+    //用于记录解析得到的ParameterMapping
     private List<ParameterMapping> parameterMappings = new ArrayList<>();
+    //参数类型
     private Class<?> parameterType;
+    //DynamixContext.bindings集合对应的MetaObject对象
     private MetaObject metaParameters;
 
     public ParameterMappingTokenHandler(Configuration configuration, Class<?> parameterType, Map<String, Object> additionalParameters) {

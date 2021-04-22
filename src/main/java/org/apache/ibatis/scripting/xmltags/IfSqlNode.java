@@ -19,8 +19,11 @@ package org.apache.ibatis.scripting.xmltags;
  * @author Clinton Begin
  */
 public class IfSqlNode implements SqlNode {
+  //ExpressionEvaluator对象用于解析<if>节点的test表达式的值
   private final ExpressionEvaluator evaluator;
+  //记录了<if>节点中的test表达式
   private final String test;
+  //记录了<if>节点的子节点
   private final SqlNode contents;
 
   public IfSqlNode(SqlNode contents, String test) {

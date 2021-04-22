@@ -23,6 +23,7 @@ package org.apache.ibatis.mapping;
  */
 public interface SqlSource {
 
+  //通过解析得到BoundSql对象
   BoundSql getBoundSql(Object parameterObject);
 
 }

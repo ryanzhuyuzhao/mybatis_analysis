@@ -69,6 +69,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
 
     // Include Fragments before parsing
+    //在解析SQL语句之前，先处理其中的<include>节点
     XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
     includeParser.applyIncludes(context.getNode());
 
@@ -79,6 +80,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     LanguageDriver langDriver = getLanguageDriver(lang);
 
     // Parse selectKey after includes and remove them.
+    //处理<selectKey>节点
     processSelectKeyNodes(id, parameterTypeClass, langDriver);
 
     // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
@@ -93,6 +95,8 @@ public class XMLStatementBuilder extends BaseBuilder {
           ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
     }
 
+    //下面是解析SQl节点的逻辑，也是parseStatementNode()方法的核心
+    //调用LanguageDriver.createSqlSource()方法创建SqlSource对象
     SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
     StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
     Integer fetchSize = context.getIntAttribute("fetchSize");
@@ -106,6 +110,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     if (resultSetTypeEnum == null) {
       resultSetTypeEnum = configuration.getDefaultResultSetType();
     }
+    //获取resultSets、keyProperty、keyColumn三个属性
     String keyProperty = context.getStringAttribute("keyProperty");
     String keyColumn = context.getStringAttribute("keyColumn");
     String resultSets = context.getStringAttribute("resultSets");

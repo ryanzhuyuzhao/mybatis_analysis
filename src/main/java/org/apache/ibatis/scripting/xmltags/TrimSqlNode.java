@@ -29,10 +29,15 @@ import org.apache.ibatis.session.Configuration;
  */
 public class TrimSqlNode implements SqlNode {
 
+  //该<trim>节点的子节点
   private final SqlNode contents;
+  //记录了前缀字符串（为<trim>节点包裹的SQL语句添加的前缀）
   private final String prefix;
+  //记录了后缀字符串（为<trim>节点包裹的SQL语句添加的后缀）
   private final String suffix;
+  //如果<trim>节点包裹的SQL语句是空语句(经常出现在if判断为否的情况下)，删除指定的前缀如where
   private final List<String> prefixesToOverride;
+  //如果<trim>包裹的SQL语句是空语句（经常出现在if判断为否的情况下），删除指定的后缀，如逗号
   private final List<String> suffixesToOverride;
   private final Configuration configuration;
 
@@ -59,9 +64,10 @@ public class TrimSqlNode implements SqlNode {
 
   private static List<String> parseOverrides(String overrides) {
     if (overrides != null) {
+      //按照“|”进行分割
       final StringTokenizer parser = new StringTokenizer(overrides, "|", false);
       final List<String> list = new ArrayList<>(parser.countTokens());
-      while (parser.hasMoreTokens()) {
+      while (parser.hasMoreTokens()) {//转换为大写，并添加到集合中
         list.add(parser.nextToken().toUpperCase(Locale.ENGLISH));
       }
       return list;
@@ -70,9 +76,13 @@ public class TrimSqlNode implements SqlNode {
   }
 
   private class FilteredDynamicContext extends DynamicContext {
+    //底层封装的DynamicContext对象
     private DynamicContext delegate;
+    //是否已经处理过前缀和后缀，初始值都为false
     private boolean prefixApplied;
     private boolean suffixApplied;
+    //用于记录子节点解析后的结果,FilteredDynamicContext.appendSql()方法会向该字段添加解析结果，
+    //而不是调用delegate.appendSql()方法
     private StringBuilder sqlBuffer;
 
     public FilteredDynamicContext(DynamicContext delegate) {
